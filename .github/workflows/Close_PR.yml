@@ -1,0 +1,32 @@
+name: Close Pull Request Actions
+
+on:
+  pull_request:
+    types:
+      - closed
+
+env:
+  action_type: ${{ github.event.action }}
+  
+
+jobs:
+  delete_on_pull_request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        if: ${{ env.action_type == 'closed' }}
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          
+      - name: Close Pull Request and Delete Source Branch
+        if: ${{ env.action_type == 'closed' }} 
+        run: |
+          if [[ github.event.pull_request.merged ]]; then
+            git fetch --prune
+            git push --delete origin ${{ github.event.pull_request.head.ref }}
+          else
+            echo "PR not merged"
+          fi
