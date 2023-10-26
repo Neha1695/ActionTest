@@ -1,0 +1,33 @@
+name: Pull Request Actions
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+env:
+  action_type: ${{ github.event.action }}
+  
+
+jobs:
+  comment_on_pull_request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comment on Pull Request
+        if: ${{ env.action_type == 'opened' }} 
+        run: |
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUBTOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"A pull request has been created"}'
+
+      - name: Comment on Pull Request
+        if: ${{ env.action_type == 'edited' }} 
+        run: |
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUBTOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"A pull request has been edited"}'
+
+      - name: Comment on Sync Pull Request
+        if: ${{ env.action_type == 'synchronize' }}
+        run: |
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUBTOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"A pull request has been synchronized"}'
+    
